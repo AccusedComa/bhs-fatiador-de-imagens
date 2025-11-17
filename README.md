@@ -27,8 +27,11 @@ npm start
 3. Na tela:
    - Selecione a imagem (PNG/JPG);
    - Informe o número de **linhas** e **colunas**;
+   - Opcional: marque **Modo Instagram (feed em grade 3x3)** para:
+     - Recortar a imagem para um quadrado central;
+     - Dividir em uma grade 3x3 com 9 fatias quadradas;
    - Clique em **Fatiar imagem**;
-   - Uma nova aba será aberta com os links para download de cada pedaço.
+   - O navegador fará o download de um arquivo `.zip` com todas as fatias.
 
 Nenhum arquivo sai da sua máquina: tudo roda localmente.
 
@@ -78,5 +81,6 @@ const { sliceImage } = require('bhs---fatiador-de-imagens');
 ## Notas
 
 - A imagem é dividida em partes de tamanho inteiro; se a largura/altura não forem divisíveis exatamente por `cols`/`rows`, os pixels excedentes são ignorados.
+- No modo Instagram 3x3, a imagem é recortada para um quadrado central com lado múltiplo de 3, garantindo 9 fatias quadradas e alinhadas.
 - Os arquivos gerados são salvos em PNG.
 

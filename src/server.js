@@ -50,8 +50,16 @@ function zipDirectory(sourceDir, outPath) {
 
 app.post('/slice', upload.single('image'), async (req, res) => {
   try {
-    const rows = parseInt(req.body.rows, 10);
-    const cols = parseInt(req.body.cols, 10);
+    const instagramMode =
+      req.body.instagramMode === 'on' || req.body.instagramMode === 'true';
+
+    let rows = parseInt(req.body.rows, 10);
+    let cols = parseInt(req.body.cols, 10);
+
+    if (instagramMode) {
+      rows = 3;
+      cols = 3;
+    }
 
     if (!req.file) {
       return res.status(400).send('Arquivo de imagem é obrigatório.');
@@ -73,10 +81,16 @@ app.post('/slice', upload.single('image'), async (req, res) => {
       rows,
       cols,
       outputDir: jobOutputDir,
+      square: instagramMode,
     });
 
-    const originalBase = path.basename(req.file.originalname, path.extname(req.file.originalname));
-    const zipFileName = `${originalBase}-${rows}x${cols}.zip`;
+    const originalBase = path.basename(
+      req.file.originalname,
+      path.extname(req.file.originalname),
+    );
+
+    const label = instagramMode ? 'insta-3x3' : `${rows}x${cols}`;
+    const zipFileName = `${originalBase}-${label}.zip`;
     const zipPath = path.join(outputBaseDir, `${Date.now()}-${zipFileName}`);
 
     await zipDirectory(jobOutputDir, zipPath);

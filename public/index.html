@@ -57,6 +57,11 @@
       border-color: #2563eb;
       box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
     }
+    input.readonly {
+      background-color: #f3f4f6;
+      color: #6b7280;
+      cursor: default;
+    }
     .field {
       margin-bottom: 0.9rem;
     }
@@ -72,6 +77,15 @@
       font-size: 0.8rem;
       color: #6b7280;
       margin-top: 0.25rem;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    .checkbox-row input[type="checkbox"] {
+      margin-top: 0.1rem;
     }
     button {
       display: inline-flex;
@@ -127,9 +141,9 @@
 <body>
   <main class="card">
     <h1>BHS – Fatiador de imagens</h1>
-    <p>Envie uma imagem, escolha o número de linhas e colunas, e baixe os pedaços gerados.</p>
+    <p>Envie uma imagem, escolha o número de linhas e colunas ou use o modo Instagram 3x3, e baixe as fatias em um ZIP.</p>
 
-    <form id="slice-form" action="/slice" method="post" enctype="multipart/form-data" target="_blank">
+    <form id="slice-form" action="/slice" method="post" enctype="multipart/form-data">
       <div class="field">
         <label for="image">Imagem (PNG/JPG)</label>
         <input type="file" id="image" name="image" accept="image/*" required />
@@ -147,12 +161,22 @@
         </div>
       </div>
 
+      <div class="field">
+        <div class="checkbox-row">
+          <input type="checkbox" id="instagramMode" name="instagramMode" />
+          <div>
+            <label for="instagramMode">Modo Instagram (feed em grade 3x3)</label>
+            <div class="helper">Recorta a imagem para um quadrado central e gera 9 fatias quadradas alinhadas para o grid.</div>
+          </div>
+        </div>
+      </div>
+
       <button type="submit" id="submit-btn">
         Fatiar imagem
       </button>
 
       <div id="status" class="status"></div>
-      <small>Ao enviar o formulário, o resultado abre em uma nova aba com os links para download.</small>
+      <small>Após o processamento, o navegador fará o download de um arquivo ZIP com todas as fatias.</small>
     </form>
   </main>
 
@@ -160,6 +184,28 @@
     const form = document.getElementById('slice-form');
     const statusEl = document.getElementById('status');
     const submitBtn = document.getElementById('submit-btn');
+    const rowsInput = document.getElementById('rows');
+    const colsInput = document.getElementById('cols');
+    const instagramCheckbox = document.getElementById('instagramMode');
+
+    function syncInstagramMode() {
+      if (instagramCheckbox.checked) {
+        rowsInput.value = 3;
+        colsInput.value = 3;
+        rowsInput.readOnly = true;
+        colsInput.readOnly = true;
+        rowsInput.classList.add('readonly');
+        colsInput.classList.add('readonly');
+      } else {
+        rowsInput.readOnly = false;
+        colsInput.readOnly = false;
+        rowsInput.classList.remove('readonly');
+        colsInput.classList.remove('readonly');
+      }
+    }
+
+    instagramCheckbox.addEventListener('change', syncInstagramMode);
+    syncInstagramMode();
 
     form.addEventListener('submit', function () {
       statusEl.textContent = 'Processando imagem...';
@@ -167,7 +213,7 @@
       submitBtn.disabled = true;
       setTimeout(() => {
         submitBtn.disabled = false;
-        statusEl.textContent = 'Se nada acontecer, verifique se o navegador bloqueou pop-ups.';
+        statusEl.textContent = 'Se nada acontecer, verifique se o navegador bloqueou o download.';
       }, 1500);
     });
   </script>

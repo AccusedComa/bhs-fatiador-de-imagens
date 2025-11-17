@@ -23,6 +23,12 @@ async function sliceImage({ inputPath, rows, cols, outputDir, square = false }) 
     const offsetY = Math.floor((h - size) / 2);
 
     image.crop({ x: offsetX, y: offsetY, w: size, h: size });
+
+    // redimensiona o quadrado para garantir tiles perfeitos para Instagram
+    const targetTileSize = 1080; // 1080x1080 por tile
+    const targetWidth = targetTileSize * cols;
+    const targetHeight = targetTileSize * rows;
+    image.resize({ w: targetWidth, h: targetHeight });
   }
 
   const tileWidth = Math.floor(image.bitmap.width / cols);

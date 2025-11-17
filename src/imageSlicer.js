@@ -1,4 +1,4 @@
-﻿const Jimp = require('jimp');
+const { Jimp } = require('jimp');
 
 async function sliceImage({ inputPath, rows, cols, outputDir }) {
   if (!inputPath) throw new Error('Caminho da imagem de entrada é obrigatório');
@@ -39,3 +39,4 @@ async function sliceImage({ inputPath, rows, cols, outputDir }) {
 module.exports = {
   sliceImage,
 };
+

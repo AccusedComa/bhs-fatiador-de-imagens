@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "archiver": "^7.0.1",
     "express": "^5.1.0",
     "jimp": "^1.6.0",
     "multer": "^2.0.2"

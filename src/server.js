@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const archiver = require('archiver');
 const { sliceImage } = require('./imageSlicer');
 
 const app = express();
@@ -32,6 +33,21 @@ const upload = multer({ storage });
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+function zipDirectory(sourceDir, outPath) {
+  return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(outPath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    output.on('close', () => resolve());
+    output.on('error', (err) => reject(err));
+    archive.on('error', (err) => reject(err));
+
+    archive.pipe(output);
+    archive.glob('*.png', { cwd: sourceDir });
+    archive.finalize();
+  });
+}
+
 app.post('/slice', upload.single('image'), async (req, res) => {
   try {
     const rows = parseInt(req.body.rows, 10);
@@ -59,70 +75,17 @@ app.post('/slice', upload.single('image'), async (req, res) => {
       outputDir: jobOutputDir,
     });
 
-    fs.readdir(jobOutputDir, (err, files) => {
-      if (err) {
-        return res.status(500).send('Erro ao listar arquivos gerados.');
-      }
+    const originalBase = path.basename(req.file.originalname, path.extname(req.file.originalname));
+    const zipFileName = `${originalBase}-${rows}x${cols}.zip`;
+    const zipPath = path.join(outputBaseDir, `${Date.now()}-${zipFileName}`);
 
-      const tileFiles = files.filter((f) => f.toLowerCase().endsWith('.png'));
+    await zipDirectory(jobOutputDir, zipPath);
 
-      const linksHtml = tileFiles
-        .map(
-          (filename) =>
-            `<li><a href="/download/${encodeURIComponent(
-              jobDirName,
-            )}/${encodeURIComponent(filename)}" target="_blank">${filename}</a></li>`,
-        )
-        .join('');
-
-      res.send(`<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <title>BHS - Fatiador de imagens - Resultado</title>
-  <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 2rem; background: #f5f5f5; }
-    .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); max-width: 640px; }
-    h1 { margin-top: 0; font-size: 1.5rem; }
-    ul { padding-left: 1.25rem; }
-    a { color: #2563eb; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .actions { margin-top: 1rem; }
-    .btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-secondary { background: #e5e7eb; color: #111827; margin-left: 0.5rem; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Imagem fatiada com sucesso</h1>
-    <p>Baixe os pedaços gerados abaixo:</p>
-    <ul>
-      ${linksHtml}
-    </ul>
-    <div class="actions">
-      <a href="/" class="btn btn-primary">Fatiar outra imagem</a>
-    </div>
-  </div>
-</body>
-</html>`);
-    });
+    res.download(zipPath, zipFileName);
   } catch (err) {
     console.error('Erro no endpoint /slice', err);
     res.status(500).send('Erro ao fatiar imagem.');
   }
-});
-
-app.get('/download/:job/:file', (req, res) => {
-  const job = req.params.job;
-  const file = req.params.file;
-
-  const filePath = path.join(outputBaseDir, job, file);
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Arquivo não encontrado.');
-  }
-
-  res.download(filePath);
 });
 
 app.listen(port, () => {

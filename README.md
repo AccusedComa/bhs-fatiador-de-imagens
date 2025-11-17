@@ -1,4 +1,4 @@
-﻿# BHS - Fatiador de imagens
+# BHS - Fatiador de imagens
 
 Ferramenta em Node.js para fatiar uma imagem em uma grade (linhas x colunas) e salvar cada pedaço como um arquivo separado.
 
@@ -12,21 +12,32 @@ No diretório do projeto:
 
 ```bash
 npm install
-npm link   # opcional, para usar o comando global
 ```
+
+## Uso com interface visual (web)
+
+1. Inicie o servidor:
+
+```bash
+npm start
+```
+
+2. Abra o navegador em: [http://localhost:3000](http://localhost:3000)
+
+3. Na tela:
+   - Selecione a imagem (PNG/JPG);
+   - Informe o número de **linhas** e **colunas**;
+   - Clique em **Fatiar imagem**;
+   - Uma nova aba será aberta com os links para download de cada pedaço.
+
+Nenhum arquivo sai da sua máquina: tudo roda localmente.
 
 ## Uso via CLI
 
-Padrão (sem `npm link`):
+Você também pode usar por linha de comando:
 
 ```bash
-node src/cli.js --input caminho/para/imagem.png --rows 3 --cols 3 --out ./saida
-```
-
-Se você rodar `npm link`, poderá usar:
-
-```bash
-bhs-fatiador --input caminho/para/imagem.png --rows 3 --cols 3 --out ./saida
+npm run cli -- --input caminho/para/imagem.png --rows 3 --cols 3 --out ./saida
 ```
 
 ### Parâmetros
@@ -68,3 +79,4 @@ const { sliceImage } = require('bhs---fatiador-de-imagens');
 
 - A imagem é dividida em partes de tamanho inteiro; se a largura/altura não forem divisíveis exatamente por `cols`/`rows`, os pixels excedentes são ignorados.
 - Os arquivos gerados são salvos em PNG.
+

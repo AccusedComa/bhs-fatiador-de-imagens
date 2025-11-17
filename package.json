@@ -5,14 +5,17 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/cli.js"
+    "start": "node src/server.js",
+    "cli": "node src/cli.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "jimp": "^1.6.0"
+    "express": "^5.1.0",
+    "jimp": "^1.6.0",
+    "multer": "^2.0.2"
   },
   "bin": {
     "bhs-fatiador": "src/cli.js"

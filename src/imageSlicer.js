@@ -42,7 +42,7 @@ async function sliceImage({ inputPath, rows, cols, outputDir, square = false }) 
         .crop({ x, y, w: tileWidth, h: tileHeight });
       const filename = `tile_${r + 1}_${c + 1}.png`;
       const outPath = path.join(outputDir, filename);
-      promises.push(clone.writeAsync(outPath));
+      promises.push(clone.write(outPath));
     }
   }
 
@@ -59,4 +59,3 @@ async function sliceImage({ inputPath, rows, cols, outputDir, square = false }) 
 module.exports = {
   sliceImage,
 };
-

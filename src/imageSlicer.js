@@ -17,12 +17,12 @@ async function sliceImage({ inputPath, rows, cols, outputDir, square = false }) 
     const h = image.bitmap.height;
     const minSide = Math.min(w, h);
 
-    // garante que o lado seja divisivel pelo numero de colunas
-    const size = minSide - (minSide % cols || 0);
+    const remainder = minSide % cols;
+    const size = remainder === 0 ? minSide : minSide - remainder;
     const offsetX = Math.floor((w - size) / 2);
     const offsetY = Math.floor((h - size) / 2);
 
-    image.crop(offsetX, offsetY, size, size);
+    image.crop({ x: offsetX, y: offsetY, w: size, h: size });
   }
 
   const tileWidth = Math.floor(image.bitmap.width / cols);
@@ -37,7 +37,9 @@ async function sliceImage({ inputPath, rows, cols, outputDir, square = false }) 
     for (let c = 0; c < cols; c++) {
       const x = c * tileWidth;
       const y = r * tileHeight;
-      const clone = image.clone().crop(x, y, tileWidth, tileHeight);
+      const clone = image
+        .clone()
+        .crop({ x, y, w: tileWidth, h: tileHeight });
       const filename = `tile_${r + 1}_${c + 1}.png`;
       const outPath = path.join(outputDir, filename);
       promises.push(clone.writeAsync(outPath));
